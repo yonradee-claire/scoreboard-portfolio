@@ -1,4 +1,4 @@
-const colors = ["#F07857", "#5C62D6", "#4FB06D", "#F5C26B", "#EBB8DD", "#BE398D", "#253342", "#43A5BE", "#CBD6E2"];
+const colors = ["#F07857", "#5C62D6", "#4FB06D", "#F5C26B", "#EBB8DD", "#BE398D", "#9A81B0", "#43A5BE", "#CBD6E2", "#D4CAA3"];
 let pressTimer;
 let longPressTriggered = false; // Prevent duplicate execution
 
@@ -18,7 +18,7 @@ function addPlayerToDOM(player) {
 
     let deleteButton = document.createElement("button");
     deleteButton.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="24" fill="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" width="30" fill="currentColor">
       <path d="M280-160q-33 0-56.5-23.5T200-240v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-160H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-760v520-520Z"/>
     </svg>
   `;
@@ -36,8 +36,10 @@ function addPlayerToDOM(player) {
     // Create the Name input element
     let nameInput = document.createElement("input");
     nameInput.type = "text";
-    nameInput.value = player.name;
-    nameInput.addEventListener("input", savePlayers);
+    nameInput.value = player.name || "Name";  // Default "Name" if it's empty
+    nameInput.style.width = "160px"; // Adjust width as needed
+    nameInput.addEventListener("input", function () {
+    });
     // Automatically select text when the user clicks the input
     nameInput.addEventListener("focus", function () {
         nameInput.select();
@@ -58,20 +60,42 @@ function addPlayerToDOM(player) {
     let scoreInput = document.createElement("input");
     /*scoreInput.type = "number"; this part is the spinners (arrow up and down clickable to add score)*/ 
     scoreInput.classList.add("score");
-    scoreInput.value = player.score;
+    scoreInput.value = player.score || 0; // Default 0 if score is empty
+    scoreInput.style.width = "100px"; // Adjust width as needed
     scoreInput.addEventListener("change", savePlayers);
+    // Automatically select text when the user clicks the score input
+        scoreInput.addEventListener("focus", function () {
+            scoreInput.select();
+            isScoreInputFocused = true; // Set the flag to true when input is focused
+        });    
+    // When Enter key is pressed, remove focus from the +score box (finalise user's input)
+    scoreInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          scoreInput.blur();  // Remove focus from the input box
+          savePlayers();     // Save the updated name
+        }
+      });
+
+    // Create a wrapper for the score and the "+" button to keep them responsive
+    let buttonWrapper = document.createElement('div');
+    buttonWrapper.classList.add('button-wrapper');
 
     let plusButton = document.createElement("button");
     plusButton.textContent = "+";
+    plusButton.style.fontSize = "20px";
+    plusButton.style.fontWeight = "bold";
+    plusButton.style.backgroundColor = "white";  // Ensure the button has a white background
+    plusButton.style.border = "none";  // No border
+    plusButton.style.cursor = "pointer";  // Change cursor to pointer for better UX
 
     // Handle both single click and long press correctly
     plusButton.addEventListener("pointerdown", function (event) {
         event.stopPropagation(); // Prevent triggering color change
-        longPressTriggered = false; //Reset flag
+        longPressTriggered = false; // Reset flag
         pressTimer = setTimeout(() => {
             longPressTriggered = true; // Set flag when long press is triggered
-            showCustomIncrementInput(plusButton, scoreInput);
-        }, 900); //900 ms long
+            showCustomIncrementInput(plusButton, scoreInput); // Custom input functionality
+        }, 900); // 900 ms for the long press
     });
 
     plusButton.addEventListener("pointerup", function () {
@@ -84,27 +108,30 @@ function addPlayerToDOM(player) {
     });
 
     plusButton.addEventListener("pointerleave", clearPress);
-    
-    // Handle color change for long press on playerDiv (except for Name input, score input, and "+")
+
+    // **Color change on long press anywhere on playerDiv (except for Name input, score input, and "+")**
     playerDiv.addEventListener("pointerdown", function (event) {
+        // Ensure it doesn't trigger for the name input, score input, or the "+" button
         if (!isNameInputFocused && !event.target.closest('input') && event.target !== plusButton) {
-            clearTimeout(pressTimer);
+            clearTimeout(pressTimer); // Reset color change timer
             pressTimer = setTimeout(() => {
-                let newColor = colors[Math.floor(Math.random() * colors.length)];
+                let newColor = colors[Math.floor(Math.random() * colors.length)]; // Choose random color
                 playerDiv.style.background = newColor;
-                savePlayers();
-            }, 1100); // Color change after long press (1100ms)
+                savePlayers(); // Save the new color in localStorage
+            }, 1000); // 1000ms for color change on long press
         }
     });
 
     playerDiv.addEventListener("pointerup", clearPress);
     playerDiv.addEventListener("pointerleave", clearPress);
+
+    // Append elements in the desired order
+    buttonWrapper.appendChild(scoreInput);   // Score input first
+    buttonWrapper.appendChild(plusButton);   // "+" button second
     
-    // **Append elements in the desired order**
     playerDiv.appendChild(deleteButton); // "-" button first
     playerDiv.appendChild(nameInput);    // Player's name
-    playerDiv.appendChild(scoreInput);   // Score
-    playerDiv.appendChild(plusButton);   // "+" button
+    playerDiv.appendChild(buttonWrapper); // Wrap score and plus button together
 
     document.getElementById('players').appendChild(playerDiv);
 }
@@ -116,11 +143,18 @@ function clearPress() {
 function savePlayers() {
     let players = [];
     document.querySelectorAll('.player').forEach(playerDiv => {
-        let name = playerDiv.children[0].value;
-        let score = parseInt(playerDiv.children[1].value);
+        let name = playerDiv.querySelector('input[type="text"]').value;  // Get name input value
+        let score = parseInt(playerDiv.querySelector('.score').value);  // Get score input value
         let color = playerDiv.style.background;
         players.push({ name, score, color });
     });
+    // Sort players by score (descending)
+    players.sort((a, b) => b.score - a.score);
+    // Clear the current players in the DOM before re-rendering
+    document.getElementById('players').innerHTML = "";
+    // Re-render players in sorted order
+    players.forEach(addPlayerToDOM);
+    // Save the sorted players back to localStorage
     localStorage.setItem('players', JSON.stringify(players));
 }
 
@@ -139,8 +173,9 @@ function showCustomIncrementInput(button, scoreInput) {
     /*input.type = "number"; don't want spinner (arrow up-down)*/
     input.classList.add("increment-input");
     input.placeholder = "+ score";
+    input.style.fontSize = "16px"; // Sets the text font size
     input.style.position = "absolute";
-    input.style.width = "60px";
+    input.style.width = "80px";
     input.style.backgroundColor = "#e0e0e0";
     input.style.border = "1px solid gray"; // Ensures gray border
     input.style.left = button.offsetLeft + button.offsetWidth + "px";

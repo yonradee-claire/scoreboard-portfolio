@@ -5,7 +5,10 @@ body {
     background-image: url("./pattern_sprinkles-background.png");
     background-size: cover; /* Ensures the image covers the entire area */
     background-position: center; /* Centers the image */
-    /*background-repeat: no-repeat; --> Prevents tiling */
+}
+
+h1 {
+    font-weight: bolder;
 }
 
 .container {
@@ -19,7 +22,7 @@ body {
 
 #players {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row; /* Stack players vertically */
     gap: 10px;
     justify-content: center;
     margin-top: 20px;
@@ -27,22 +30,26 @@ body {
 
 .player {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap; /* Allow the player to wrap when necessary */
+    align-items: center; /* Align items vertically centered */
     justify-content: space-between;
     padding: 10px;
-    width: 250px;
+    width: 100%; /* Make player element take full available width */
+    max-width: 500px; /* Restrict the maximum width */
+    height: 150px;
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.3s ease-in-out;
+    background-color: #f9f9f9;
 }
 
 .player input {
     border: none;
     background: transparent;
-    font-size: 16px;
+    font-size: 28px;
     font-weight: bold;
     text-align: center;
-    width: 80px;
+    width: 250px;
 }
 
 .player button {
@@ -66,9 +73,10 @@ body {
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 20px;
 }
 
-#addPlayer button:hover {
+#addPlayer:hover {
     background: #218838;
 }
 
@@ -83,6 +91,49 @@ input[type="color"] {
     padding: 5px;
     border: 1px solid gray !important; /* Ensures the border is visible and gray */
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 8px;
     text-align: center;
+    /*width: 80px; (change in .js)*/
+}
+
+.button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between input and "+" button */
+}
+
+button, input {
+    margin: 0;
+    padding: 5px 10px;
+    font-size: 16px;
+}
+
+@media (max-width: 600px) {
+    .player {
+        flex-direction: row; /* Keep the buttons and input in one row */
+        justify-content: space-between; /* Space items evenly across the row */
+        align-items: center; /* Align items to center */
+        max-width: 100%; /* Allow the player to take full available width */   
+        height: 150px; /* Let the height adjust dynamically */
+    }
+
+    .button-wrapper {
+        flex-direction: row; /* Stack the buttons vertically on narrow screens */
+        align-items: center;
+    }
+
+    .player input {
+        font-size: 28px; /* Adjust font size for smaller screens */
+        width: 140px;
+    }
+
+    .player button {
+        font-size: 14px;
+        padding: 5px 8px; /* Smaller buttons on small screens */
+    }
+
+    #addPlayer {
+        font-size: 16px; /* Adjust font size for the "Add Player" button */
+    }
+
 }
