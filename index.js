@@ -27,6 +27,7 @@ function addPlayerToDOM(player) {
         savePlayers();
     });
 
+    deleteButton.querySelector("svg").setAttribute("fill", "black");
     deleteButton.style.background = "none";
     deleteButton.style.border = "none";
     deleteButton.style.cursor = "pointer";
@@ -82,6 +83,7 @@ function addPlayerToDOM(player) {
 
     let plusButton = document.createElement("button");
     plusButton.textContent = "+";
+    plusButton.style.color = "black";
     plusButton.style.fontSize = "20px";
     plusButton.style.fontWeight = "bold";
     plusButton.style.backgroundColor = "white";  // Ensure the button has a white background
