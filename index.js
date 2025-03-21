@@ -120,7 +120,7 @@ function addPlayerToDOM(player) {
                 let newColor = colors[Math.floor(Math.random() * colors.length)]; // Choose random color
                 playerDiv.style.background = newColor;
                 savePlayers(); // Save the new color in localStorage
-            }, 1000); // 1000ms for color change on long press
+            }, 700); // 700ms for color change on long press
         }
     });
 
